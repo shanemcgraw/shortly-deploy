@@ -3,6 +3,10 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     concat: {
+    	js: {
+    		src:'public/client/*.js',
+    		dest: 'public/client/squished.js',
+    	},
     },
 
     mochaTest: {
@@ -21,12 +25,14 @@ module.exports = function(grunt) {
     },
 
     uglify: {
+    	js:{
+    		src:'dist/built.js',
+    		dest:'dist/uglay.js',
+    	}
     },
 
     eslint: {
-      target: [
-        // Add list of files to lint here
-      ]
+      target: '**/*.js', 
     },
 
     cssmin: {
@@ -51,8 +57,22 @@ module.exports = function(grunt) {
 
     shell: {
       prodServer: {
+      	command: 'git push dop master',
+      	options: {
+      		stdout: true,
+      		stderr: true
+      	}
+
+      }, 
+      betaServer: {
+      	command: 'git push dob master',
+      	options: {
+      		stdout: true,
+      		stderr: true
+      	}
       }
     },
+
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -63,6 +83,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-nodemon');
+  grunt.loadNpmTasks('grunt-git');
 
   grunt.registerTask('server-dev', function (target) {
     // Running nodejs in a different process and displaying output on the main console
@@ -96,17 +117,14 @@ module.exports = function(grunt) {
   grunt.registerTask('build', [
   ]);
 
-  grunt.registerTask('upload', function(n) {
+  grunt.registerTask('deploy', function(n) {
     if (grunt.option('prod')) {
-      // add your production server task here
+    	grunt.tast.run(['mochaTest', 'concat', 'uglify', 'shell:prodServer']);
     } else {
-      grunt.task.run([ 'server-dev' ]);
+      grunt.task.run([ 'shell:betaServer']);
     }
   });
 
-  grunt.registerTask('deploy', [
-    // add your deploy tasks here
-  ]);
-
+  grunt.registerTask('default', ['mochaTest', 'concat', 'uglify', 'watch','nodemon']);
 
 };
